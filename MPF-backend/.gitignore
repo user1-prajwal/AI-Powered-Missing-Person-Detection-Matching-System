@@ -1,0 +1,6 @@
+.env
+__pycache__
+uploads
+test_db.py
+test_email.py
+images

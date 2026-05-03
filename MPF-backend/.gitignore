@@ -4,3 +4,4 @@ uploads
 test_db.py
 test_email.py
 images
+.vscode

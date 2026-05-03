@@ -72,19 +72,8 @@ Please contact your local police station immediately.
         print(f"Email failed: {e}")
 
 
-
-# send_match_alert(
-#     family_email = family_email,
-#     person_name  = name,
-#     confidence   = match["confidence"],
-#     latitude     = match["latitude"],
-#     longitude    = match["longitude"]
-# )
-
-
-# ══════════════════════════════════════════════════════════════
 #  PUBLIC PORTAL ROUTES
-# ══════════════════════════════════════════════════════════════
+
 
 # Public uploads a sighting — NO login required
 @app.route("/api/public/upload", methods=["POST"])
@@ -138,68 +127,8 @@ def public_upload():
     }), 200
 
 
-# ══════════════════════════════════════════════════════════════
+
 #  ADMIN PORTAL ROUTES
-# ══════════════════════════════════════════════════════════════
-
-# Admin login (simple for now)
-# ADMIN_CREDENTIALS = {
-#     "username": "admin",
-#     "password": "police123"
-# }
-
-# @app.route("/api/admin/login", methods=["POST"])
-# def admin_login():
-#     data = request.get_json()
-#     if (data.get("username") == ADMIN_CREDENTIALS["username"] and
-#         data.get("password") == ADMIN_CREDENTIALS["password"]):
-#         return jsonify({"message": "Login successful", "token": "admin-token-123"}), 200
-#     return jsonify({"error": "Invalid credentials"}), 401
-
-
-# # Admin adds a missing person
-# @app.route("/api/admin/add-missing", methods=["POST"])
-# def add_missing():
-#     # Simple token check
-#     token = request.headers.get("Authorization")
-#     if token != "Bearer admin-token-123":
-#         return jsonify({"error": "Unauthorized"}), 401
-
-#     if "image" not in request.files:
-#         return jsonify({"error": "No image uploaded"}), 400
-
-#     file         = request.files["image"]
-#     name         = request.form.get("name",         "Unknown")
-#     age          = request.form.get("age",          0)
-#     family_email = request.form.get("family_email", "")
-
-#     filename  = secure_filename(file.filename)
-#     save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-#     file.save(save_path)
-
-#     person_id = save_missing_person(name, age, save_path, family_email)
-
-#     if person_id is None:
-#         return jsonify({"error": "No face detected in image."}), 400
-
-#     # ── After adding, immediately check all existing sightings ─
-#     persons = get_all_missing_persons()
-#     for person in persons:
-#         if person["id"] == person_id:
-#             matches = find_matches_for_person(person)
-#             for match in matches:
-#                 send_alert_email(
-#                     family_email = family_email,
-#                     person_name  = name,
-#                     confidence   = match["confidence"],
-#                     latitude     = match["latitude"],
-#                     longitude    = match["longitude"]
-#                 )
-
-#     return jsonify({
-#         "message"   : "Missing person added successfully",
-#         "person_id" : person_id
-#     }), 200
 
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -299,47 +228,6 @@ def pending_orgs():
     return jsonify({"pending": orgs}), 200
 
 
-# # Update add-missing to use org token
-# @app.route("/api/admin/add-missing", methods=["POST"])
-# def add_missing():
-#     token = request.headers.get("Authorization", "Bearer ")
-#     token = token.replace("Bearer ", "")
-
-#     # Extract org_id from token
-#     try:
-#         org_id = int(token.split("-")[1])
-#     except:
-#         return jsonify({"error": "Unauthorized"}), 401
-
-#     if "image" not in request.files:
-#         return jsonify({"error": "No image uploaded"}), 400
-
-#     file         = request.files["image"]
-#     name         = request.form.get("name",         "Unknown")
-#     age          = request.form.get("age",          0)
-#     family_email = request.form.get("family_email", "")
-
-#     filename  = secure_filename(file.filename)
-#     save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-#     file.save(save_path)
-
-#     # Pass org_id to save function
-#     person_id = save_missing_person(name, age, save_path, family_email, org_id)
-
-#     if person_id is None:
-#         return jsonify({"error": "No face detected in image."}), 400
-
-#     persons = get_all_missing_persons()
-#     for person in persons:
-#         if person["id"] == person_id:
-#             matches = find_matches_for_person(person)
-#             for match in matches:
-#                 send_alert_email(family_email, name, match["confidence"],
-#                                  match["latitude"], match["longitude"])
-
-#     return jsonify({"message": "Missing person added", "person_id": person_id}), 200
-
-
 
 # Get approved organizations
 @app.route("/api/superadmin/approved", methods=["GET"])
@@ -371,27 +259,6 @@ def reject_org(org_id):
     conn.commit()
     conn.close()
     return jsonify({"message": "Organization rejected"}), 200
-
-
-
-
-
-
-
-# # Admin views all missing persons
-# @app.route("/api/admin/missing-persons", methods=["GET"])
-# def get_missing_persons():
-#     token = request.headers.get("Authorization")
-#     if token != "Bearer admin-token-123":
-#         return jsonify({"error": "Unauthorized"}), 401
-
-#     persons = get_all_missing_persons()
-#     # Don't send encoding (too large) to frontend
-#     for p in persons:
-#         p.pop("encoding", None)
-
-#     return jsonify({"missing_persons": persons}), 200
-
 
 
 

@@ -354,7 +354,7 @@ const S = {
     justifyContent : "center",
   },
   dropTitle  : { fontSize: "14px", color: "#94a3b8", fontWeight: "500" },
-  dropHint   : { fontSize: "12px", color: "#334155" },
+  dropHint   : { fontSize: "12px", color: "#6f7c8f" },
   preview    : {
     maxWidth     : "100%",
     maxHeight    : "180px",

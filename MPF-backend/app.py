@@ -313,6 +313,72 @@ def add_missing():
 
     return jsonify({"message": "Missing person added", "person_id": person_id}), 200
 
+@app.route("/api/admin/rescan", methods=["POST"])
+def rescan():
+    org_id = verify_token(request.headers.get("Authorization", ""))
+    if not org_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if "image" not in request.files:
+        return jsonify({"error": "No image"}), 400
+
+    file      = request.files["image"]
+    person_id = request.form.get("person_id")
+    filename  = secure_filename(file.filename)
+    save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(save_path)
+
+    # Get person from DB
+    conn   = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM missing_persons WHERE id = %s", (person_id,))
+    person = cursor.fetchone()
+    conn.close()
+
+    if not person:
+        return jsonify({"error": "Person not found"}), 404
+
+    # Update encoding with new photo
+    from database import get_encoding
+    import json
+    new_encoding = get_encoding(save_path)
+    if new_encoding is None:
+        return jsonify({"error": "No face detected in new photo"}), 400
+
+    conn   = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE missing_persons SET encoding = %s, image_path = %s WHERE id = %s",
+        (json.dumps(new_encoding), save_path, person_id)
+    )
+    conn.commit()
+    conn.close()
+
+    # Run matching with new encoding
+    person["encoding"] = json.dumps(new_encoding)
+    matches = find_matches_for_person(person)
+
+    alerts_sent     = 0
+    best_confidence = 0
+
+    for match in matches:
+        send_match_alert(
+            family_email        = person["family_email"],
+            person_name         = person["name"],
+            confidence          = match["confidence"],
+            latitude            = match["latitude"],
+            longitude           = match["longitude"],
+            sighting_image_path = match["image_path"]
+        )
+        alerts_sent += 1
+        if match["confidence"] > best_confidence:
+            best_confidence = match["confidence"]
+
+    return jsonify({
+        "matches_found"   : alerts_sent,
+        "best_confidence" : best_confidence if alerts_sent > 0 else None
+    }), 200
+
 # Health check
 @app.route("/", methods=["GET"])
 def home():

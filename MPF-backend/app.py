@@ -37,40 +37,8 @@ def verify_token(token_header):
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ── Email sender ──────────────────────────────────────────────
-def send_alert_email(family_email, person_name, confidence, latitude, longitude):
-    try:
-        sender   = emaill     # change this
-        password = e_password    # change this (use App Password)
-
-        maps_link = f"https://www.google.com/maps?q={latitude},{longitude}"
-
-        body = f"""
-🚨 MISSING PERSON ALERT 🚨
-
-Good news! A possible match has been found for {person_name}.
-
-Match Confidence : {confidence}%
-Location         : {maps_link}
-
-Please contact your local police station immediately.
-
-- Missing Person Finder System
-        """
-
-        msg           = MIMEText(body)
-        msg["Subject"] = f"ALERT: Possible match found for {person_name}"
-        msg["From"]    = sender
-        msg["To"]      = family_email
-
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-            smtp.login(sender, password)
-            smtp.send_message(msg)
-
-        print(f"✅ Email sent to {family_email}")
-    except Exception as e:
-        print(f"Email failed: {e}")
-
+# ── Email sender 
+#removed because, i used email_service
 
 #  PUBLIC PORTAL ROUTES
 

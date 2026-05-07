@@ -34,36 +34,46 @@ export default function PublicUpload() {
     handleFile(e.dataTransfer.files[0]);
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
     if (!image) {
       setStatus("error");
       setMessage("Please select an image first.");
       return;
     }
 
-    setStatus("loading");
+    // ── Client side file size check ───────────────────────────
+    if (image.size > 5 * 1024 * 1024) {
+      setStatus("error");
+      setMessage("File too large. Please upload an image under 5MB.");
+      return;
+    }
 
+    setStatus("loading");
     const fd = new FormData();
-    fd.append("image", image);
-    fd.append("latitude", location.lat);
+    fd.append("image",     image);
+    fd.append("latitude",  location.lat);
     fd.append("longitude", location.lon);
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/public/upload",
-        fd
+        "http://localhost:5000/api/public/upload", fd
       );
       setStatus("success");
       setMessage(`Sighting reported! Report ID: #${res.data.sighting_id}`);
       setImage(null);
       setPreview(null);
     } catch (err) {
-      setStatus("error");
-      setMessage(
-        err.response?.data?.error || "Upload failed. Please try again."
-      );
+      // Rate limited
+      if (err.response?.status === 429) {
+        setStatus("ratelimit");
+        setMessage("Too many uploads! You can submit maximum 5 reports per hour. Please try again later.");
+      } else {
+        setStatus("error");
+        setMessage(err.response?.data?.error || "Upload failed. Please try again.");
+      }
     }
   };
+
 
   return (
     <div style={S.page}>
@@ -186,6 +196,14 @@ export default function PublicUpload() {
           </div>
 
           {/* STATUS */}
+          {/* Rate limit warning */}
+
+          {status === "ratelimit" && (
+            <div style={S.alertAmber}>
+              ⚠️ {message}
+            </div>
+          )}
+
           {status === "success" && (
             <div style={S.alertGreen}>{message}</div>
           )}
@@ -435,5 +453,18 @@ const S = {
     textAlign: "center",
     marginTop: "10px",
   },
+
+  alertAmber: {
+  padding     : "10px",
+  borderRadius: "10px",
+  background  : "rgba(251,191,36,0.1)",
+  border      : "1px solid rgba(251,191,36,0.2)",
+  color       : "#fbbf24",
+  marginBottom: "12px",
+  fontSize    : "13px",
+  lineHeight  : "1.5",
+},
 };
+
+
 

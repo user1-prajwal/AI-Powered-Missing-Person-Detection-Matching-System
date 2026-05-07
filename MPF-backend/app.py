@@ -52,59 +52,6 @@ def allowed_file(filename):
 
 #  PUBLIC PORTAL ROUTES
 
-
-# Public uploads a sighting — NO login required
-# @app.route("/api/public/upload", methods=["POST"])
-# def public_upload():
-#     if "image" not in request.files:
-#         return jsonify({"error": "No image uploaded"}), 400
-
-#     file      = request.files["image"]
-#     latitude  = request.form.get("latitude",  0)
-#     longitude = request.form.get("longitude", 0)
-
-#     if file.filename == "":
-#         return jsonify({"error": "No file selected"}), 400
-
-#     if not allowed_file(file.filename):
-#         return jsonify({"error": "Only jpg/jpeg/png allowed"}), 400
-
-#     filename  = secure_filename(file.filename)
-#     save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-#     file.save(save_path)
-
-#     sighting_id = save_sighting(save_path, latitude, longitude)
-
-#     if sighting_id is None:
-#         return jsonify({"error": "No face detected in image. Please upload a clearer photo."}), 400
-
-#     # ── After saving, check against ALL missing persons ───────
-#     missing_persons = get_all_missing_persons()
-#     alerts_sent     = 0
-
-#     for person in missing_persons:
-#         matches = find_matches_for_person(person)
-#         for match in matches:
-#             if match["sighting_id"] == sighting_id:
-#                 # Send email alert
-#                 # send_alert_email(
-#                 send_match_alert(
-#                     family_email = person["family_email"],
-#                     person_name  = person["name"],
-#                     confidence   = match["confidence"],
-#                     latitude     = latitude,
-#                     longitude    = longitude,
-#                     sighting_image_path = save_path 
-#                 )
-#                 alerts_sent += 1
-
-#     return jsonify({
-#         "message"     : "Sighting uploaded successfully",
-#         "sighting_id" : sighting_id,
-#         "alerts_sent" : alerts_sent
-#     }), 200
-
-
 # Max 5 uploads per IP per hour
 @app.route("/api/public/upload", methods=["POST"])
 @limiter.limit("5 per hour")

@@ -8,11 +8,21 @@ from email.mime.text import MIMEText
 from database import get_connection, save_sighting, save_missing_person, get_all_missing_persons
 from matcher import find_matches_for_person
 from email_service import send_match_alert
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from dotenv import load_dotenv
 load_dotenv()
 emaill=os.getenv("EMAIL")
 e_password=os.getenv("EMAIL_PASSWORD")
 app = Flask(__name__)
+
+limiter = Limiter(
+    app            = app,
+    key_func       = get_remote_address,
+    default_limits = ["200 per day"]
+)
+
 CORS(app)  # allows React to talk to Flask
 
 # ── Config ────────────────────────────────────────────────────
@@ -44,12 +54,78 @@ def allowed_file(filename):
 
 
 # Public uploads a sighting — NO login required
+# @app.route("/api/public/upload", methods=["POST"])
+# def public_upload():
+#     if "image" not in request.files:
+#         return jsonify({"error": "No image uploaded"}), 400
+
+#     file      = request.files["image"]
+#     latitude  = request.form.get("latitude",  0)
+#     longitude = request.form.get("longitude", 0)
+
+#     if file.filename == "":
+#         return jsonify({"error": "No file selected"}), 400
+
+#     if not allowed_file(file.filename):
+#         return jsonify({"error": "Only jpg/jpeg/png allowed"}), 400
+
+#     filename  = secure_filename(file.filename)
+#     save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+#     file.save(save_path)
+
+#     sighting_id = save_sighting(save_path, latitude, longitude)
+
+#     if sighting_id is None:
+#         return jsonify({"error": "No face detected in image. Please upload a clearer photo."}), 400
+
+#     # ── After saving, check against ALL missing persons ───────
+#     missing_persons = get_all_missing_persons()
+#     alerts_sent     = 0
+
+#     for person in missing_persons:
+#         matches = find_matches_for_person(person)
+#         for match in matches:
+#             if match["sighting_id"] == sighting_id:
+#                 # Send email alert
+#                 # send_alert_email(
+#                 send_match_alert(
+#                     family_email = person["family_email"],
+#                     person_name  = person["name"],
+#                     confidence   = match["confidence"],
+#                     latitude     = latitude,
+#                     longitude    = longitude,
+#                     sighting_image_path = save_path 
+#                 )
+#                 alerts_sent += 1
+
+#     return jsonify({
+#         "message"     : "Sighting uploaded successfully",
+#         "sighting_id" : sighting_id,
+#         "alerts_sent" : alerts_sent
+#     }), 200
+
+
+# Max 5 uploads per IP per hour
 @app.route("/api/public/upload", methods=["POST"])
+@limiter.limit("5 per hour")
 def public_upload():
     if "image" not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
 
-    file      = request.files["image"]
+    file = request.files["image"]
+
+    # ── File size check (max 5MB) ─────────────────────────────
+    file.seek(0, 2)                    # seek to end
+    file_size = file.tell()            # get size in bytes
+    file.seek(0)                       # reset to start
+    if file_size > 5 * 1024 * 1024:   # 5MB
+        return jsonify({"error": "File too large. Maximum size is 5MB."}), 400
+
+    # ── File type check ───────────────────────────────────────
+    allowed = {"image/jpeg", "image/jpg", "image/png"}
+    if file.content_type not in allowed:
+        return jsonify({"error": "Only JPG and PNG images allowed."}), 400
+
     latitude  = request.form.get("latitude",  0)
     longitude = request.form.get("longitude", 0)
 
@@ -66,9 +142,8 @@ def public_upload():
     sighting_id = save_sighting(save_path, latitude, longitude)
 
     if sighting_id is None:
-        return jsonify({"error": "No face detected in image. Please upload a clearer photo."}), 400
+        return jsonify({"error": "No face detected. Please upload a clearer photo."}), 400
 
-    # ── After saving, check against ALL missing persons ───────
     missing_persons = get_all_missing_persons()
     alerts_sent     = 0
 
@@ -76,15 +151,13 @@ def public_upload():
         matches = find_matches_for_person(person)
         for match in matches:
             if match["sighting_id"] == sighting_id:
-                # Send email alert
-                # send_alert_email(
                 send_match_alert(
-                    family_email = person["family_email"],
-                    person_name  = person["name"],
-                    confidence   = match["confidence"],
-                    latitude     = latitude,
-                    longitude    = longitude,
-                    sighting_image_path = save_path 
+                    family_email        = person["family_email"],
+                    person_name         = person["name"],
+                    confidence          = match["confidence"],
+                    latitude            = latitude,
+                    longitude           = longitude,
+                    sighting_image_path = save_path
                 )
                 alerts_sent += 1
 
@@ -94,6 +167,13 @@ def public_upload():
         "alerts_sent" : alerts_sent
     }), 200
 
+
+# Handle rate limit error nicely
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({
+        "error": "Too many uploads. You can upload maximum 5 photos per hour. Please try again later."
+    }), 429
 
 
 #  ADMIN PORTAL ROUTES

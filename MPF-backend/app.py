@@ -306,7 +306,13 @@ def add_missing():
                     sighting_image_path = match["image_path"] 
                 )
 
-    return jsonify({"message": "Missing person added", "person_id": person_id}), 200
+    # return jsonify({"message": "Missing person added", "person_id": person_id}), 200
+    return jsonify({
+    "message"        : "Missing person added",
+    "person_id"      : person_id,
+    "matches_found"  : len(matches),
+    "best_confidence": max([m["confidence"] for m in matches], default=0) if matches else 0
+}), 200
 
 @app.route("/api/admin/rescan", methods=["POST"])
 def rescan():

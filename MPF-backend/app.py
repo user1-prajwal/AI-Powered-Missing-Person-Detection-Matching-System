@@ -396,6 +396,20 @@ def get_stats():
         "total_missing"  : total_missing,
         "total_orgs"     : total_orgs,
     }), 200
+    
+    
+@app.route("/api/admin/delete-person/<int:person_id>", methods=["DELETE"])
+def delete_person(person_id):
+    org_id = verify_token(request.headers.get("Authorization", ""))
+    if not org_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    conn   = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM missing_persons WHERE id = %s", (person_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Person deleted successfully"}), 200
 
 # Health check
 @app.route("/", methods=["GET"])

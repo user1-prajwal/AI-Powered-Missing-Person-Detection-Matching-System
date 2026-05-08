@@ -373,6 +373,29 @@ def rescan():
         "matches_found"   : alerts_sent,
         "best_confidence" : best_confidence if alerts_sent > 0 else None
     }), 200
+    
+@app.route("/api/stats", methods=["GET"])
+def get_stats():
+    conn   = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT COUNT(*) as total FROM public_sightings")
+    total_sightings = cursor.fetchone()["total"]
+
+    cursor.execute("SELECT COUNT(*) as total FROM missing_persons")
+    total_missing = cursor.fetchone()["total"]
+
+    cursor.execute(
+        "SELECT COUNT(*) as total FROM organizations WHERE is_approved = TRUE AND type != 'superadmin'"
+    )
+    total_orgs = cursor.fetchone()["total"]
+
+    conn.close()
+    return jsonify({
+        "total_sightings": total_sightings,
+        "total_missing"  : total_missing,
+        "total_orgs"     : total_orgs,
+    }), 200
 
 # Health check
 @app.route("/", methods=["GET"])

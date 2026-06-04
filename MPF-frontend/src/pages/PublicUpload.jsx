@@ -192,7 +192,7 @@ export default function PublicUpload() {
                   borderColor: dragOver  ? "#00BD7D"
                              : preview   ? "#16A34A"
                              : "rgba(0,189,125,0.2)",
-                  background : dragOver  ? "rgba(0,189,125,0.05)" : "rgba(255,255,255,0.01)",
+                  background : dragOver  ? "rgba(0,189,125,0.05)" : "rgba(78, 80, 73, 0.72)",
                   transform  : dragOver  ? "scale(0.99)" : "scale(1)",
                 }}
               >
@@ -294,7 +294,7 @@ export default function PublicUpload() {
 const S = {
   page: {
     fontFamily   : "'Poppins', sans-serif",
-    background   : "#060A0F",
+    background   : "#ffffff",
     minHeight    : "calc(100vh - 64px)",
     display      : "flex",
     alignItems   : "center",
@@ -411,7 +411,7 @@ const S = {
     fontSize    : "clamp(42px, 5vw, 64px)",
     fontWeight  : "700",
     lineHeight  : "1.05",
-    color       : "#F9FAFB",
+    color       : "#000000",
     letterSpacing: "-0.5px",
     marginBottom: "16px",
   },
@@ -458,7 +458,7 @@ const S = {
     gap          : "16px",
     padding      : "14px 20px 14px 16px",
     background   : "rgba(8,14,25,0.9)",
-    border       : "1px solid rgba(0,189,125,0.12)",
+    border       : "1px solid rgb(0, 189, 126)",
     borderRadius : "8px",
     marginBottom : "8px",
     position     : "relative",
@@ -507,7 +507,7 @@ const S = {
     fontFamily: "'Poppins', sans-serif",
     fontSize  : "11px",
     fontWeight: "300",
-    color     : "#374151",
+    color     : "#6bd898",
     lineHeight: "1.6",
   },
 
@@ -563,8 +563,8 @@ const S = {
   cardShadow: {
     position    : "absolute",
     inset       : "0",
-    background  : "rgba(0,189,125,0.03)",
-    border      : "1px solid rgba(0,189,125,0.08)",
+    background  : "rgb(71, 216, 221)",
+    border      : "1px solid rgba(112, 192, 164, 0.8)",
     borderRadius: "16px",
     transform   : "perspective(1000px) rotateY(-6deg) rotateX(2deg) translateX(-16px) translateY(16px)",
     transformOrigin: "right center",
@@ -572,14 +572,14 @@ const S = {
 
   /* Main tilted card */
   card: {
-    background     : "rgba(8,14,25,0.97)",
+    background     : "rgba(231, 231, 231, 0.97)",
     border         : "1px solid rgba(0,189,125,0.2)",
     borderRadius   : "16px",
     position       : "relative",
     overflow       : "hidden",
     transform      : "perspective(1000px) rotateY(-4deg) rotateX(1deg)",
     transformOrigin: "right center",
-    boxShadow      : "-24px 0 60px rgba(0,0,0,0.5), 0 40px 80px rgba(0,0,0,0.3)",
+    boxShadow      : "-24px 0 60px rgba(122, 188, 197, 0.5), 0 40px 80px rgba(185, 71, 71, 0.3)",
   },
 
   /* Teal top strip */
@@ -595,7 +595,7 @@ const S = {
     right       : "16px",
     width       : "24px",
     height      : "24px",
-    borderBottom: "2px solid rgba(0,189,125,0.2)",
+    borderBottom: "2px solid rgb(0, 189, 126)",
     borderRight : "2px solid rgba(0,189,125,0.2)",
     borderRadius: "0 0 4px 0",
   },
@@ -621,7 +621,7 @@ const S = {
     fontFamily  : "'Oswald', sans-serif",
     fontSize    : "18px",
     fontWeight  : "600",
-    color       : "#F9FAFB",
+    color       : "#000000",
     letterSpacing: "0.3px",
   },
 
@@ -629,7 +629,7 @@ const S = {
     fontFamily: "'Poppins', sans-serif",
     fontSize  : "11px",
     fontWeight: "300",
-    color     : "#374151",
+    color     : "#20252e",
     marginTop : "2px",
   },
 
@@ -661,7 +661,7 @@ const S = {
     width          : "50px",
     height         : "50px",
     borderRadius   : "10px",
-    background     : "rgba(0,189,125,0.08)",
+    background     : "rgba(0, 189, 126, 0.62)",
     border         : "1px solid rgba(0,189,125,0.2)",
     display        : "flex",
     alignItems     : "center",
@@ -672,14 +672,14 @@ const S = {
     fontFamily: "'Poppins', sans-serif",
     fontSize  : "13px",
     fontWeight: "400",
-    color     : "#9CA3AF",
+    color     : "#ffffff",
   },
 
   dropHint: {
     fontFamily: "'Poppins', sans-serif",
     fontSize  : "11px",
     fontWeight: "300",
-    color     : "#1F2937",
+    color     : "#fefeff",
   },
 
   previewImg: {
@@ -702,7 +702,7 @@ const S = {
     alignItems   : "center",
     gap          : "7px",
     padding      : "8px 12px",
-    background   : "rgba(0,189,125,0.04)",
+    background   : "rgba(0, 189, 126, 0.37)",
     border       : "1px solid rgba(0,189,125,0.12)",
     borderRadius : "6px",
     marginBottom : "14px",
@@ -712,7 +712,7 @@ const S = {
     fontFamily: "'Poppins', sans-serif",
     fontSize  : "11px",
     fontWeight: "400",
-    color     : "#00BD7D",
+    color     : "#000000",
   },
 
   /* Alerts */
